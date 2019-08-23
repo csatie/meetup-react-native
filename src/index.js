@@ -1,15 +1,14 @@
 import React, {Fragment} from 'react';
+import {StatusBar} from 'react-native';
 import './config/ReactotronConfig';
 
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import Routes from './routes';
 
 export default function App() {
-  return <View />;
+  return (
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#22202C" />
+      <Routes />
+    </>
+  );
 }
