@@ -1,6 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {Alert} from 'react-native';
+import React, {useEffect, useState, useMemo} from 'react';
+import {Alert, ActivityIndicator, View} from 'react-native';
 import {withNavigationFocus} from 'react-navigation';
+import {format, subDays, addDays} from 'date-fns';
+import pt from 'date-fns/locale/pt-BR';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '~/services/api';
 
@@ -8,29 +10,69 @@ import Background from '~/components/Background';
 import Header from '~/components/Header';
 import Meetup from '~/components/Meetup';
 
-import {Container, List} from './styles';
+import {
+  Container,
+  NoResults,
+  DateNavigation,
+  ArrowButton,
+  Title,
+  List,
+} from './styles';
 
 function Dashboard({isFocused}) {
+  const [loading, setLoading] = useState(true);
   const [meetups, setMeetups] = useState([]);
-  const [refresh, setRefresh] = useState(false);
+  const [page, setPage] = useState(1);
+  const [loadMore, setLoadMore] = useState(true);
+  const [date, setDate] = useState(new Date());
+
+  const dateFormatted = useMemo(
+    () => format(date, "d 'de' MMMM", {locale: pt}),
+    [date]
+  );
 
   useEffect(() => {
     async function loadMeetups() {
       const response = await api.get('meetups', {
         params: {
-          page: 3,
+          date,
+          page,
         },
       });
 
-      setMeetups(response.data);
+      const data = page === 1 ? response.data : [...meetups, ...response.data];
+
+      setMeetups(data);
       console.tron.log(response.data);
+      setLoadMore(false);
+      setLoading(false);
     }
-    loadMeetups();
-  }, []);
+
+    if (isFocused && loadMore) {
+      loadMeetups();
+      setLoadMore(false);
+    }
+  }, [isFocused, date, loadMore, page, meetups]);
+
+  function handlePrevDay() {
+    setDate(subDays(date, 1));
+    setMeetups([]);
+    setLoadMore(true);
+    setLoading(true);
+    setPage(1);
+  }
+
+  function handleNextDay() {
+    setDate(addDays(date, 1));
+    setMeetups([]);
+    setLoadMore(true);
+    setLoading(true);
+    setPage(1);
+  }
 
   async function handleSubscribe(id) {
     try {
-      // setLoading(true);
+      setLoading(true);
       await api.post(`meetups/${id}/subscribe`);
       Alert.alert('Sucesso!', 'Inscrição foi realizada com sucesso');
     } catch (error) {
@@ -38,23 +80,43 @@ function Dashboard({isFocused}) {
     }
   }
 
-  handleRefresh = () => {
-    setRefreshing(true);
-    loadMeetups(1, true);
-    setRefreshing(false);
-  };
+  function handleLoadMore() {
+    if (meetups.length >= 10) {
+      setPage(page + 1);
+      setLoadMore(true);
+    }
+  }
 
   return (
     <Background>
       <Container>
         <Header />
-        <List
-          data={meetups}
-          keyExtractor={item => String(item.id)}
-          renderItem={({item}) => (
-            <Meetup data={item} onSubmit={() => handleSubscribe(item.id)} />
-          )}
-        />
+
+        <DateNavigation>
+          <ArrowButton onPress={handlePrevDay}>
+            <Icon name="chevron-left" size={30} color="#fff" />
+          </ArrowButton>
+          <Title>{dateFormatted}</Title>
+          <ArrowButton onPress={handleNextDay}>
+            <Icon name="chevron-right" size={30} color="#fff" />
+          </ArrowButton>
+        </DateNavigation>
+
+        {loading ? (
+          <ActivityIndicator size="small" color="#FFF" />
+        ) : meetups.length === 0 ? (
+          <NoResults>Nenhum meetup nesta data</NoResults>
+        ) : (
+          <List
+            data={meetups}
+            keyExtractor={item => String(item.id)}
+            renderItem={({item}) => (
+              <Meetup data={item} onSubmit={() => handleSubscribe(item.id)} />
+            )}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+          />
+        )}
       </Container>
     </Background>
   );
