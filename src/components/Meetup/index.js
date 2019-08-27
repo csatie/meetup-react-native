@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
+import PropTypes from 'prop-types';
 import {formatDateWithHour} from 'date-fns';
-import {View} from 'react-native';
+import {View, Text} from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
@@ -15,13 +16,12 @@ import {
   SubmitButton,
 } from './styles';
 
-export default function Meetup({data, onSubscribe}) {
+export default function Meetup({data, subscribed, onSubmit}) {
   // const dateParsed = useMemo(() => formatDateWithHour(data.date), [data.date]);
 
   return (
     <Container past={data.past}>
       <Banner source={{uri: data.file.url}} />
-
       <Info>
         <Title>{data.name}</Title>
         <Content>
@@ -38,8 +38,8 @@ export default function Meetup({data, onSubscribe}) {
         </Content>
       </Info>
 
-      <SubmitButton onPress={onSubscribe} past={data.past}>
-        Realizar inscrição
+      <SubmitButton onPress={onSubmit} past={data.past}>
+        {subscribed ? `Cancelar inscrição` : `Realizar inscrição`}
       </SubmitButton>
     </Container>
   );

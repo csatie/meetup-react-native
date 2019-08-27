@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Alert} from 'react-native';
+import {withNavigationFocus} from 'react-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '~/services/api';
 
@@ -9,7 +10,7 @@ import Meetup from '~/components/Meetup';
 
 import {Container, List} from './styles';
 
-export default function Dashboard() {
+function Dashboard({isFocused}) {
   const [meetups, setMeetups] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
@@ -51,7 +52,7 @@ export default function Dashboard() {
           data={meetups}
           keyExtractor={item => String(item.id)}
           renderItem={({item}) => (
-            <Meetup data={item} onSubscribe={() => handleSubscribe(item.id)} />
+            <Meetup data={item} onSubmit={() => handleSubscribe(item.id)} />
           )}
         />
       </Container>
@@ -65,3 +66,5 @@ Dashboard.navigationOptions = {
     <Icon name="format-list-bulleted" size={20} color={tintColor} />
   ),
 };
+
+export default withNavigationFocus(Dashboard);

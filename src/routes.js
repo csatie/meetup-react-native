@@ -21,8 +21,9 @@ export default (isSigned = false) =>
         }),
         App: createBottomTabNavigator(
           {
-            Dashboard,
             Subscription,
+            Dashboard,
+
             Profile,
           },
           {
