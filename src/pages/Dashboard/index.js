@@ -75,8 +75,10 @@ function Dashboard({isFocused}) {
       setLoading(true);
       await api.post(`meetups/${id}/subscribe`);
       Alert.alert('Sucesso!', 'Inscrição foi realizada com sucesso');
+      setLoading(false);
     } catch (error) {
       Alert.alert('Erro', 'Houve uma falha na inscrição');
+      setLoading(false);
     }
   }
 
