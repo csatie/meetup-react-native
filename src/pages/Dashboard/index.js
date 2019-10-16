@@ -17,6 +17,7 @@ import {
   ArrowButton,
   Title,
   List,
+  LoadingView,
 } from './styles';
 
 function Dashboard({isFocused}) {
@@ -93,7 +94,6 @@ function Dashboard({isFocused}) {
     <Background>
       <Container>
         <Header />
-
         <DateNavigation>
           <ArrowButton onPress={handlePrevDay}>
             <Icon name="chevron-left" size={30} color="#fff" />
@@ -104,9 +104,13 @@ function Dashboard({isFocused}) {
           </ArrowButton>
         </DateNavigation>
 
-        {loading ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : meetups.length === 0 ? (
+        {loading && (
+          <LoadingView>
+            <ActivityIndicator size="small" color="#FFF" />
+          </LoadingView>
+        )}
+
+        {meetups.length === 0 ? (
           <NoResults>Nenhum meetup nesta data</NoResults>
         ) : (
           <List

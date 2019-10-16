@@ -1,5 +1,6 @@
 import {Alert} from 'react-native';
 import {takeLatest, call, put, all} from 'redux-saga/effects';
+import {NavigationActions} from 'react-navigation';
 import api from '~/services/api';
 import {signInSuccess, signFailure} from './actions';
 
@@ -17,8 +18,6 @@ export function* signIn({payload}) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
 
     yield put(signInSuccess(token, user));
-
-    // history.push('/dashboard');
   } catch (err) {
     Alert.alert('Erro no login', 'Falha na autenticação');
     yield put(signFailure());
@@ -27,7 +26,7 @@ export function* signIn({payload}) {
 
 export function* signUp({payload}) {
   try {
-    const {name, email, password} = payload;
+    const {name, email, password, navigation} = payload;
 
     yield call(api.post, 'users', {
       name,
@@ -35,6 +34,7 @@ export function* signUp({payload}) {
       password,
     });
     Alert.alert('Sucesso', 'Cadastro realizado com sucesso');
+    navigation.navigate('SignIn');
   } catch (err) {
     Alert.alert('Erro no cadastro', 'Falha no cadastro');
     yield put(signFailure());
@@ -51,9 +51,7 @@ export function setToken({payload}) {
   }
 }
 
-export function signOut() {
-  // history.push('/');
-}
+export function signOut() {}
 
 export default all([
   takeLatest('persist/REHYDRATE', setToken),
